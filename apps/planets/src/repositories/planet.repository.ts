@@ -1,4 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Planet } from '../entities/planet.entity';
+import { Repository } from 'typeorm';
 
-@Injectable()
-export class PlanetRepository {}
+export class PlanetRepository extends Repository<Planet> {
+  async getPlanetById(planetId: number): Promise<Planet | undefined> {
+    try {
+      return await this.findOne({ where: { id: planetId } });
+    } catch (error) {
+      throw error;
+    }
+  }
+}
