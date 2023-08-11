@@ -1,4 +1,15 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
+import { Planet } from '../entities/planet.entity';
+import { PlanetService } from '../services/planet.service';
+import { PageQueryDto } from '../dtos/page-query.dto';
 
-@Controller('planet')
-export class PlanetController {}
+@Controller('planets')
+export class PlanetController {
+  constructor(private readonly planetService: PlanetService) {}
+
+  @Get()
+  async getAllPlanets(@Query() query: PageQueryDto): Promise<Planet[]> {
+    const page = query.page;
+    return await this.planetService.getPlanetsUntilPageFromSWAPI(page);
+  }
+}
