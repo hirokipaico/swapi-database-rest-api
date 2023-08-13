@@ -81,7 +81,7 @@ export class PlanetService {
           id: planetId,
         });
         this.logger.log(
-          `Planet wit ID: ${planetId} was fetched from SWAPI and saved in database.`,
+          `Planet with ID: ${planetId} was fetched from SWAPI and saved in database.`,
         );
       } else {
         this.logger.log(`Planet with ID: ${planetId} was found in database.`);

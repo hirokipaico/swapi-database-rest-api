@@ -24,13 +24,13 @@ export class PlanetController {
     }
   }
 
-  @Get(':planetId')
+  @Get(':id')
   async getPlanetById(
     @Param()
     params: IdParamDto,
   ): Promise<Planet> {
     try {
-      const planetId = params.planetId;
+      const planetId = params.id;
       return await this.planetService.getPlanetById(planetId);
     } catch (error) {
       throw new InternalServerErrorException();
