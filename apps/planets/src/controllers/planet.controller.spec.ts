@@ -92,7 +92,7 @@ describe('PlanetController', () => {
 
     it('should throw an InternalServerErrorException if service throws an error', async () => {
       jest
-        .spyOn(planetService, 'getPlanetById')
+        .spyOn(planetService, 'getPlanetsUntilPageFromSWAPI')
         .mockRejectedValue(new InternalServerErrorException());
 
       await expect(planetController.getAllPlanets(2)).rejects.toThrow(
