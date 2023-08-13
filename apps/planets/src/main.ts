@@ -4,6 +4,8 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { PlanetSwaggerConfig } from 'libs/config/swagger/planet.config';
+import helmet from 'helmet';
+import { corsOptions } from 'libs/config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(PlanetsModule);
@@ -11,6 +13,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
+
+  // Security measurements
+  app.use(helmet());
+  app.enableCors(corsOptions);
 
   // Swagger documentation
   const document = SwaggerModule.createDocument(app, PlanetSwaggerConfig);
