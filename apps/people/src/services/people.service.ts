@@ -17,9 +17,8 @@ export class PeopleService {
     private readonly peopleRepository: PeopleRepository,
   ) {}
 
-  private transformApiPerson(apiPerson: Person): Person {
+  private transformApiPerson(apiPerson: Person): Partial<Person> {
     return {
-      id: null,
       name: apiPerson.name,
       height: apiPerson.height,
       mass: apiPerson.mass,
@@ -35,9 +34,9 @@ export class PeopleService {
     };
   }
 
-  async getAllPeopleFromSWAPI(page: number): Promise<Person[]> {
+  async getAllPeopleFromSWAPI(page: number): Promise<Partial<Person>[]> {
     try {
-      const people: Person[] = [];
+      const people: Partial<Person>[] = [];
       const swapiBaseUrl: string =
         this.configService.get<string>('SWAPI_BASE_URL');
       let fetchedPages = 0;
@@ -54,8 +53,8 @@ export class PeopleService {
 
           fetchedPages++;
 
-          const transformedPeople: Person[] = response.map((apiPerson) =>
-            this.transformApiPerson(apiPerson),
+          const transformedPeople: Partial<Person>[] = response.map(
+            (apiPerson) => this.transformApiPerson(apiPerson),
           );
 
           people.push(...transformedPeople);

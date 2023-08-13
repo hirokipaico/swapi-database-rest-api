@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CoreModule } from '@app/core';
 import { PlanetController } from './controllers/planet.controller';
 import { PlanetService } from './services/planet.service';
-import { PlanetRepository } from './repositories/planet.repository';
 import { Planet } from './entities/planet.entity';
 
 @Module({
@@ -17,7 +16,7 @@ import { Planet } from './entities/planet.entity';
     TypeOrmModule.forFeature([Planet]),
     HttpModule,
   ],
-  providers: [PlanetService, PlanetRepository],
+  providers: [PlanetService],
   controllers: [PlanetController],
 })
 export class PlanetsModule {}

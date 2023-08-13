@@ -1,46 +1,85 @@
+import { Controller, Get, Post, Query, Param, Body } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Query,
-  Param,
-  InternalServerErrorException,
-  Post,
-  Body,
-} from '@nestjs/common';
+  ApiTags,
+  ApiQuery,
+  ApiParam,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 import { PeopleService } from '../services/people.service';
 import { Person } from '../entities/person.entity';
-import { PageQueryDto } from '@app/core/dtos/page-query.dto';
-import { IdParamDto } from '@app/core/dtos/id-param.dto';
 import { InputPersonDto } from '../dtos/person.dto';
+import { PositiveIntPipe } from '@app/core/pipes/positive-integer.pipe';
 
+@ApiTags('people')
 @Controller('people')
 export class PeopleController {
   constructor(private readonly peopleService: PeopleService) {}
 
   @Get()
-  async getAllPeople(@Query() query: PageQueryDto): Promise<Person[]> {
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    example: 1,
+  })
+  @ApiOkResponse({
+    type: Person,
+    isArray: true,
+  })
+  @ApiBadRequestResponse({
+    description: `Query element 'page' must be a positive integer.`,
+  })
+  @ApiInternalServerErrorResponse({
+    description: `An internal server error ocurred.`,
+  })
+  async getAllPeople(
+    @Query('page', PositiveIntPipe) page: number,
+  ): Promise<Partial<Person>[]> {
     try {
-      const page = query.page;
       return this.peopleService.getAllPeopleFromSWAPI(page);
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 
   @Get(':id')
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+  })
+  @ApiOkResponse({
+    type: Person,
+  })
+  @ApiBadRequestResponse({
+    description: `Param element 'id' must be a positive integer.`,
+  })
+  @ApiInternalServerErrorResponse({
+    description: `An internal server error ocurred.`,
+  })
   async getPersonById(
-    @Param()
-    params: IdParamDto,
+    @Param('id', PositiveIntPipe)
+    personId: number,
   ): Promise<Person> {
     try {
-      const personId = params.id;
       return this.peopleService.getPersonById(personId);
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 
   @Post()
+  @ApiOkResponse({
+    description: 'Person information saved successfully.',
+    type: Person,
+  })
+  @ApiBadRequestResponse({
+    description: 'Body element must not be empty/must be a string.',
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'An internal server error ocurred.',
+  })
   async postPerson(@Body() inputDto: InputPersonDto) {
     try {
       const nextId = await this.peopleService.getNextAvailableId();
@@ -56,13 +95,11 @@ export class PeopleController {
 
       const savedPerson = await this.peopleService.savePerson(person);
       return {
-        message: 'Person information saved successfully',
+        message: 'Person information saved successfully.',
         data: savedPerson,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error while trying to save person: ${error.message}`,
-      );
+      throw error;
     }
   }
 }

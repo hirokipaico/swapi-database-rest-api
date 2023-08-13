@@ -1,39 +1,69 @@
+import { Controller, Get, Query, Param } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Query,
-  Param,
-  InternalServerErrorException,
-} from '@nestjs/common';
+  ApiTags,
+  ApiQuery,
+  ApiParam,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 import { PlanetService } from '../services/planet.service';
 import { Planet } from '../entities/planet.entity';
-import { PageQueryDto } from '@app/core/dtos/page-query.dto';
-import { IdParamDto } from '@app/core/dtos/id-param.dto';
+import { PositiveIntPipe } from '@app/core/pipes/positive-integer.pipe';
 
+@ApiTags('planets')
 @Controller('planets')
 export class PlanetController {
   constructor(private readonly planetService: PlanetService) {}
 
   @Get()
-  async getAllPlanets(@Query() query: PageQueryDto): Promise<Planet[]> {
+  @ApiQuery({
+    name: 'page',
+    type: Number,
+    required: true,
+    example: 1,
+  })
+  @ApiOkResponse({
+    type: Planet,
+    isArray: true,
+  })
+  @ApiBadRequestResponse({
+    description: `Query element 'page' must be a positive integer.`,
+  })
+  @ApiInternalServerErrorResponse({
+    description: `An internal server error ocurred.`,
+  })
+  async getAllPlanets(
+    @Query('page', PositiveIntPipe) page: number,
+  ): Promise<Planet[]> {
     try {
-      const page = query.page;
       return await this.planetService.getPlanetsUntilPageFromSWAPI(page);
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 
   @Get(':id')
-  async getPlanetById(
-    @Param()
-    params: IdParamDto,
-  ): Promise<Planet> {
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    required: true,
+    example: 1,
+  })
+  @ApiOkResponse({
+    type: Planet,
+  })
+  @ApiBadRequestResponse({
+    description: `Param element 'id' must be a positive integer.`,
+  })
+  @ApiInternalServerErrorResponse({
+    description: `An internal server error ocurred.`,
+  })
+  async getPlanetById(@Param('id') planetId: number): Promise<Planet> {
     try {
-      const planetId = params.id;
       return await this.planetService.getPlanetById(planetId);
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw error;
     }
   }
 }
