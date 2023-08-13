@@ -60,7 +60,9 @@ export class PeopleController {
         data: savedPerson,
       };
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(
+        `Error while trying to save person: ${error.message}`,
+      );
     }
   }
 }
