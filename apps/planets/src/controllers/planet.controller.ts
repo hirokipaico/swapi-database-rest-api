@@ -8,6 +8,7 @@ import {
 import { Planet } from '../entities/planet.entity';
 import { PlanetService } from '../services/planet.service';
 import { PageQueryDto } from '../dtos/page-query.dto';
+import { IdParamDto } from '../dtos/id-param.dto';
 
 @Controller('planets')
 export class PlanetController {
@@ -24,9 +25,10 @@ export class PlanetController {
   }
 
   @Get(':planetId')
-  async getPlanetById(@Param('planetId') id: number): Promise<Planet> {
+  async getPlanetById(@Param() params: IdParamDto): Promise<Planet> {
     try {
-      return await this.planetService.getPlanetById(id);
+      const planetId = params.planetId;
+      return await this.planetService.getPlanetById(planetId);
     } catch (error) {
       throw new InternalServerErrorException();
     }
