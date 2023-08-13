@@ -4,8 +4,9 @@ import {
   TypeOrmModuleOptions,
   TypeOrmModuleAsyncOptions,
 } from '@nestjs/typeorm';
-import { Planet } from 'apps/planets/src/entities/planet.entity';
 import { join } from 'path';
+import { Planet } from 'apps/planets/src/entities/planet.entity';
+import { Person } from 'apps/people/src/entities/person.entity';
 
 const postgresConfig = (
   configService: ConfigService,
@@ -17,11 +18,11 @@ const postgresConfig = (
     username: configService.get<string>('AWS_RDB_POSTGRES_DB_USERNAME'),
     password: configService.get<string>('AWS_RDB_POSTGRES_DB_PASSWORD'),
     database: configService.get<string>('AWS_RDB_POSTGRES_DB_NAME'),
-    entities: [Planet],
-    migrations: [join(__dirname + '../../src/database/migration/*{.ts,.js}')],
+    entities: [Planet, Person],
+    migrations: [join(__dirname + '../migrations/*{.ts,.js}')],
     migrationsRun: true,
-    synchronize: false,
-    logging: true,
+    synchronize: true,
+    logging: false,
   };
 };
 
