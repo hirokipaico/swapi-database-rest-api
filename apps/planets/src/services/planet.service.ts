@@ -57,36 +57,36 @@ export class PlanetService {
 
   async getPlanetById(id: number): Promise<Planet> {
     try {
-      try {
-        const planet = await this.planetRepository.findOne({
-          where: { id: id },
-        });
-        if (planet) {
-          this.logger.log(`Planet with ID:${id} was found in database.`);
-          return planet;
-        }
-      } catch (error) {
+      // Get planet from database first
+      let planet = await this.planetRepository.findOne({ where: { id: id } });
+
+      if (!planet) {
+        // Fetch planet information from SWAPI
         this.logger.error(
-          `Planet with ID ${id} was not found in database: ${error.message}`,
+          `Planet with ID: ${id} not found in database. Fetching planet from SWAPI to be saved in database...`,
         );
+        const swapiBaseUrl: string =
+          this.configService.get<string>('SWAPI_BASE_URL');
+        const swapiFetchUrl = `${swapiBaseUrl}/planets/${id}?format=json`;
+
+        const response = await firstValueFrom<Planet>(
+          this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
+        );
+
+        // Save fetched planet in database
+        planet = await this.planetRepository.save({ ...response, id: id });
+        this.logger.log(
+          `Planet wit ID: ${id} was fetched from SWAPI and saved in database.`,
+        );
+      } else {
+        this.logger.log(`Planet with ID: ${id} was found in database.`);
       }
 
-      // If the planet is not found on DB or empty object was returned from db then fetch it
-      const swapiBaseUrl: string =
-        this.configService.get<string>('SWAPI_BASE_URL');
-      const swapiFetchUrl = `${swapiBaseUrl}/planets/${id}?format=json`;
-
-      this.logger.log(`Fetching planets with ID ${id}...`);
-      const response = await firstValueFrom<Planet>(
-        this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
-      );
-
-      // Save fetched planet in database
-      await this.planetRepository.save(response);
-      this.logger.log(`Planet fetched from SWAPI and saved. ID: ${id}`);
-      return response;
+      return planet;
     } catch (error) {
-      this.logger.error(`Error while trying to fetch planet: ${error.message}`);
+      this.logger.error(
+        `Error while trying to fetch or save planet: ${error.message}`,
+      );
       throw error;
     }
   }

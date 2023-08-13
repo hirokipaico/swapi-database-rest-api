@@ -2,7 +2,6 @@ import { Controller, Get, Query, Param } from '@nestjs/common';
 import { Planet } from '../entities/planet.entity';
 import { PlanetService } from '../services/planet.service';
 import { PageQueryDto } from '../dtos/page-query.dto';
-import { IdParamDto } from '../dtos/id-param.dto';
 
 @Controller('planets')
 export class PlanetController {
@@ -15,8 +14,7 @@ export class PlanetController {
   }
 
   @Get(':planetId')
-  async getPlanetById(@Param('planetId') params: IdParamDto): Promise<Planet> {
-    const id = params.id;
+  async getPlanetById(@Param('planetId') id: number): Promise<Planet> {
     return await this.planetService.getPlanetById(id);
   }
 }
