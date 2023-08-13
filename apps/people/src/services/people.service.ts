@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { map, firstValueFrom } from 'rxjs';
+import { map, firstValueFrom, last } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Person } from '../entities/person.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PersonRepository } from '../repositories/person.repository';
+import { PeopleRepository } from '../repositories/person.repository';
 
 @Injectable()
 export class PeopleService {
@@ -14,7 +14,7 @@ export class PeopleService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     @InjectRepository(Person)
-    private readonly personRepository: PersonRepository,
+    private readonly peopleRepository: PeopleRepository,
   ) {}
 
   async getAllPeopleFromSWAPI(page: number): Promise<Person[]> {
@@ -58,7 +58,7 @@ export class PeopleService {
   async getPersonById(personId: number): Promise<Person> {
     try {
       // Get person from database first
-      let person = await this.personRepository.findOne({
+      let person = await this.peopleRepository.findOne({
         where: { id: personId },
       });
 
@@ -76,7 +76,7 @@ export class PeopleService {
         );
 
         // Save fetched person in database
-        person = await this.personRepository.save({
+        person = await this.peopleRepository.save({
           ...response,
           id: personId,
         });
@@ -92,6 +92,38 @@ export class PeopleService {
       this.logger.error(
         `Error while trying to fetch or save person: ${error.message}`,
       );
+      throw error;
+    }
+  }
+
+  async getNextAvailableId(): Promise<number> {
+    try {
+      this.logger.log('Generating next available ID...');
+      const queryBuilder = this.peopleRepository.createQueryBuilder('person');
+      const lastPerson = await queryBuilder
+        .orderBy('person.id', 'DESC')
+        .getOne();
+
+      const lastId = Math.max(lastPerson?.id || 0, 10000);
+      const nextId = lastId + 1;
+      this.logger.log(`Completed. Next available ID: ${nextId}`);
+      return nextId;
+    } catch (error) {
+      this.logger.error(
+        `Error while generating available ID: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async savePerson(person: Person): Promise<Person> {
+    try {
+      this.logger.log(`Saving person with ID: ${person.id} in database...`);
+      const savedPerson = await this.peopleRepository.save(person);
+
+      return savedPerson;
+    } catch (error) {
+      this.logger.error(`Error while trying to save person: ${error.message}`);
       throw error;
     }
   }
