@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeopleController } from './people.controller';
 import { PeopleService } from '../services/people.service';
 import { Person } from '../entities/person.entity';
-import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { InputPersonDto } from '../dtos/person.dto';
 
 describe('PeopleController', () => {
   let peopleController: PeopleController;
@@ -97,6 +101,64 @@ describe('PeopleController', () => {
         .mockRejectedValue(new InternalServerErrorException());
 
       await expect(peopleController.getPersonById(1)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
+  describe('savePerson', () => {
+    it('should save a person and return the saved person', async () => {
+      const inputDto: InputPersonDto = {
+        name: 'Luke Skywalker',
+        birth_year: '19BBY',
+        eye_color: 'blue',
+        gender: 'male',
+        hair_color: 'blond',
+        height: '172',
+        homeworld: 'https://swapi.dev/api/planets/1/',
+        mass: '77',
+        skin_color: 'fair',
+      };
+
+      const nextId = await peopleService.getNextAvailableId();
+      const currentDate = new Date().toISOString();
+      const expectedSavedPerson: Person = {
+        id: nextId,
+        created: currentDate,
+        edited: currentDate,
+        url: null,
+        ...inputDto,
+      };
+
+      jest
+        .spyOn(peopleService, 'savePerson')
+        .mockResolvedValue(expectedSavedPerson);
+
+      const result = await peopleController.postPerson(inputDto);
+      expect(result).toEqual({
+        message: 'Person information saved successfully.',
+        data: expectedSavedPerson,
+      });
+    });
+
+    it('should throw InternalServerErrorException on service error', async () => {
+      const inputDto: InputPersonDto = {
+        name: 'Luke Skywalker',
+        birth_year: '19BBY',
+        eye_color: 'blue',
+        gender: 'male',
+        hair_color: 'blond',
+        height: '172',
+        homeworld: 'https://swapi.dev/api/planets/1/',
+        mass: '77',
+        skin_color: 'fair',
+      };
+
+      jest
+        .spyOn(peopleService, 'savePerson')
+        .mockRejectedValue(new InternalServerErrorException());
+
+      await expect(peopleController.postPerson(inputDto)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
