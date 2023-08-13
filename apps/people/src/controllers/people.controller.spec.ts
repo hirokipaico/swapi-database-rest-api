@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PeopleController } from './people.controller';
 import { PeopleService } from '../services/people.service';
 import { Person } from '../entities/person.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 
 describe('PeopleController', () => {
   let peopleController: PeopleController;
@@ -36,8 +36,16 @@ describe('PeopleController', () => {
         .spyOn(peopleService, 'getAllPeopleFromSWAPI')
         .mockResolvedValue(mockPeople);
 
-      const result = await peopleController.getAllPeople({ page: 1 });
+      const result = await peopleController.getAllPeople(1);
       expect(result).toEqual(mockPeople);
+    });
+
+    it('should throw a BadRequestException if page query is not a positive integer', async () => {
+      try {
+        await peopleController.getAllPeople(-2);
+      } catch (error) {
+        expect(error).toBeInstanceOf(BadRequestException);
+      }
     });
 
     it('should throw an InternalServerErrorException if service throws an error', async () => {
@@ -45,7 +53,7 @@ describe('PeopleController', () => {
         .spyOn(peopleService, 'getAllPeopleFromSWAPI')
         .mockRejectedValue(new InternalServerErrorException());
 
-      await expect(peopleController.getAllPeople({ page: 1 })).rejects.toThrow(
+      await expect(peopleController.getAllPeople(1)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -71,8 +79,16 @@ describe('PeopleController', () => {
 
       jest.spyOn(peopleService, 'getPersonById').mockResolvedValue(mockPerson);
 
-      const result = await peopleController.getPersonById({ id: 1 });
+      const result = await peopleController.getPersonById(1);
       expect(result).toEqual(mockPerson);
+    });
+
+    it(`should throw a BadRequestException if id param is not a positive integer`, async () => {
+      try {
+        await peopleController.getPersonById(-5);
+      } catch (error) {
+        expect(error).toBeInstanceOf(BadRequestException);
+      }
     });
 
     it('should throw an InternalServerErrorException if service throws an error', async () => {
@@ -80,7 +96,7 @@ describe('PeopleController', () => {
         .spyOn(peopleService, 'getPersonById')
         .mockRejectedValue(new InternalServerErrorException());
 
-      await expect(peopleController.getPersonById({ id: 1 })).rejects.toThrow(
+      await expect(peopleController.getPersonById(1)).rejects.toThrow(
         InternalServerErrorException,
       );
     });

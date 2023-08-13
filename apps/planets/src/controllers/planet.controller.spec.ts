@@ -30,7 +30,7 @@ describe('PlanetController', () => {
   });
 
   describe('getAllPlanets', () => {
-    it('Should return an array of planets', async () => {
+    it('should return an array of planets', async () => {
       const mockPlanets: Planet[] = [
         {
           id: null,
@@ -71,7 +71,7 @@ describe('PlanetController', () => {
         .spyOn(planetService, 'getPlanetsUntilPageFromSWAPI')
         .mockResolvedValue(mockPlanets);
 
-      const result = await planetController.getAllPlanets({ page: 1 });
+      const result = await planetController.getAllPlanets(1);
 
       const expectedNames = mockPlanets.map((mockPlanet) => mockPlanet.name);
       const actualNames = result.map((resultPlanet) => resultPlanet.name);
@@ -82,12 +82,20 @@ describe('PlanetController', () => {
       });
     });
 
+    it('should throw a BadRequestException if page query is not a positive integer', async () => {
+      try {
+        await planetController.getAllPlanets(-2);
+      } catch (error) {
+        expect(error).toBeInstanceOf(BadRequestException);
+      }
+    });
+
     it('should throw an InternalServerErrorException if service throws an error', async () => {
       jest
-        .spyOn(planetService, 'getPlanetsUntilPageFromSWAPI')
+        .spyOn(planetService, 'getPlanetById')
         .mockRejectedValue(new InternalServerErrorException());
 
-      await expect(planetController.getAllPlanets({ page: 1 })).rejects.toThrow(
+      await expect(planetController.getAllPlanets(2)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -111,13 +119,13 @@ describe('PlanetController', () => {
         id: 2,
       };
       jest.spyOn(planetService, 'getPlanetById').mockResolvedValue(mockPlanet);
-      const result = await planetController.getPlanetById({ id: 2 });
+      const result = await planetController.getPlanetById(2);
       expect(result).toBe(mockPlanet);
     });
 
-    it(`should throw a BadRequestException due to negative query string value`, async () => {
+    it(`should throw a BadRequestException if id param is not a positive integer`, async () => {
       try {
-        await planetController.getAllPlanets({ page: -2 });
+        await planetController.getPlanetById(-5);
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
       }
@@ -128,7 +136,7 @@ describe('PlanetController', () => {
         .spyOn(planetService, 'getPlanetById')
         .mockRejectedValue(new InternalServerErrorException());
 
-      await expect(planetController.getPlanetById({ id: 10 })).rejects.toThrow(
+      await expect(planetController.getPlanetById(10)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
