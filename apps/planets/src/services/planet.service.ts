@@ -17,6 +17,20 @@ export class PlanetService {
     private readonly planetRepository: PlanetRepository,
   ) {}
 
+  private transformApiPlanet(apiPlanet: Planet): Planet {
+    return {
+      id: null,
+      name: apiPlanet.name,
+      climate: apiPlanet.climate,
+      diameter: apiPlanet.diameter,
+      gravity: apiPlanet.gravity,
+      population: apiPlanet.population,
+      residents: apiPlanet.residents,
+      terrain: apiPlanet.terrain,
+      url: apiPlanet.url,
+    };
+  }
+
   async getPlanetsUntilPageFromSWAPI(page: number): Promise<Planet[]> {
     try {
       const planets: Planet[] = [];
@@ -27,18 +41,19 @@ export class PlanetService {
       for (let i = 1; i <= page; i++) {
         this.logger.log(`Fetching planets in page ${i}...`);
         const swapiFetchUrl = `${swapiBaseUrl}/planets/?page=${i}&format=json`;
+
         try {
-          const response = await firstValueFrom<Planet[]>(
-            this.httpService
-              .get(swapiFetchUrl)
-              .pipe(map((res) => res.data?.results)),
+          const response = await firstValueFrom<{ results: Planet[] }>(
+            this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
           );
 
           fetchedPages++;
 
-          for (let j = 0; j < response.length; j++) {
-            planets.push(response[j]);
-          }
+          const transformedPlanets: Planet[] = response.results.map(
+            (apiPlanet) => this.transformApiPlanet(apiPlanet),
+          );
+
+          planets.push(...transformedPlanets);
         } catch (error) {
           this.logger.error(`Error while fetching page ${i}: ${error.message}`);
           break;
@@ -75,10 +90,11 @@ export class PlanetService {
           this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
         );
 
-        // Save fetched planet in database
+        // Save transformed planet in database
+        const transformedPlanet: Planet = this.transformApiPlanet(response);
         planet = await this.planetRepository.save({
-          ...response,
-          id: planetId,
+          ...transformedPlanet,
+          id: Number(planetId),
         });
         this.logger.log(
           `Planet with ID: ${planetId} was fetched from SWAPI and saved in database.`,

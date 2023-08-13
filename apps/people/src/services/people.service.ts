@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { map, firstValueFrom, last } from 'rxjs';
+import { map, firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Person } from '../entities/person.entity';
@@ -16,6 +16,24 @@ export class PeopleService {
     @InjectRepository(Person)
     private readonly peopleRepository: PeopleRepository,
   ) {}
+
+  private transformApiPerson(apiPerson: Person): Person {
+    return {
+      id: null,
+      name: apiPerson.name,
+      height: apiPerson.height,
+      mass: apiPerson.mass,
+      hair_color: apiPerson.hair_color,
+      skin_color: apiPerson.skin_color,
+      eye_color: apiPerson.eye_color,
+      birth_year: apiPerson.birth_year,
+      gender: apiPerson.gender,
+      homeworld: apiPerson.homeworld,
+      created: apiPerson.created,
+      edited: apiPerson.edited,
+      url: apiPerson.url,
+    };
+  }
 
   async getAllPeopleFromSWAPI(page: number): Promise<Person[]> {
     try {
@@ -36,9 +54,11 @@ export class PeopleService {
 
           fetchedPages++;
 
-          for (let j = 0; j < response.length; j++) {
-            people.push(response[j]);
-          }
+          const transformedPeople: Person[] = response.map((apiPerson) =>
+            this.transformApiPerson(apiPerson),
+          );
+
+          people.push(...transformedPeople);
         } catch (error) {
           this.logger.error(`Error while fetching page ${i}: ${error.message}`);
           break;
@@ -57,16 +77,11 @@ export class PeopleService {
 
   async getPersonById(personId: number): Promise<Person> {
     try {
-      // Get person from database first
       let person = await this.peopleRepository.findOne({
         where: { id: personId },
       });
 
       if (!person) {
-        // Fetch person information from SWAPI
-        this.logger.error(
-          `Person with ID: ${personId} not found in database. Fetching person from SWAPI to be saved in database...`,
-        );
         const swapiBaseUrl: string =
           this.configService.get<string>('SWAPI_BASE_URL');
         const swapiFetchUrl = `${swapiBaseUrl}/people/${personId}?format=json`;
@@ -75,16 +90,18 @@ export class PeopleService {
           this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
         );
 
-        // Save fetched person in database
+        const transformedPerson = this.transformApiPerson(response);
         person = await this.peopleRepository.save({
-          ...response,
-          id: personId,
+          ...transformedPerson,
+          id: Number(personId),
         });
         this.logger.log(
-          `Person with ID: ${personId} was fetched from SWAPI and saved in database.`,
+          `Person with ID: ${personId} was fetched from SWAPI and saved in the database.`,
         );
       } else {
-        this.logger.log(`Person with ID: ${personId} was found in database.`);
+        this.logger.log(
+          `Person with ID: ${personId} was found in the database.`,
+        );
       }
 
       return person;
