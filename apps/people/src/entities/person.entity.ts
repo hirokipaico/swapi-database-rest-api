@@ -38,6 +38,6 @@ export class Person {
   @Column({ type: 'timestamp' })
   edited: Date;
 
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'varchar', length: 200, nullable: true })
   url: string;
 }
