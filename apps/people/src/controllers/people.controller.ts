@@ -44,7 +44,7 @@ export class PeopleController {
   async postPerson(@Body() inputDto: InputPersonDto) {
     try {
       const nextId = await this.peopleService.getNextAvailableId();
-      const currentDate = new Date();
+      const currentDate = new Date().toISOString();
 
       const person: Person = {
         id: nextId,

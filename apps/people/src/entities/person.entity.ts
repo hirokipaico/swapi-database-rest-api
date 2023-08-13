@@ -33,10 +33,10 @@ export class Person {
   skin_color: string;
 
   @Column({ type: 'timestamp' })
-  created: Date;
+  created: string;
 
   @Column({ type: 'timestamp' })
-  edited: Date;
+  edited: string;
 
   @Column({ type: 'varchar', length: 200, nullable: true })
   url: string;
