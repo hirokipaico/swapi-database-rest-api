@@ -3,6 +3,8 @@ import { map, firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Person } from '../entities/person.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PersonRepository } from '../repositories/person.repository';
 
 @Injectable()
 export class PeopleService {
@@ -11,6 +13,8 @@ export class PeopleService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @InjectRepository(Person)
+    private readonly personRepository: PersonRepository,
   ) {}
 
   async getAllPeopleFromSWAPI(page: number): Promise<Person[]> {
@@ -46,6 +50,47 @@ export class PeopleService {
     } catch (error) {
       this.logger.error(
         `Error while trying to fetch from SWAPI: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async getPersonById(personId: number): Promise<Person> {
+    try {
+      // Get person from database first
+      let person = await this.personRepository.findOne({
+        where: { id: personId },
+      });
+
+      if (!person) {
+        // Fetch person information from SWAPI
+        this.logger.error(
+          `Person with ID: ${personId} not found in database. Fetching person from SWAPI to be saved in database...`,
+        );
+        const swapiBaseUrl: string =
+          this.configService.get<string>('SWAPI_BASE_URL');
+        const swapiFetchUrl = `${swapiBaseUrl}/people/${personId}?format=json`;
+
+        const response = await firstValueFrom<Person>(
+          this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
+        );
+
+        // Save fetched person in database
+        person = await this.personRepository.save({
+          ...response,
+          id: personId,
+        });
+        this.logger.log(
+          `Person with ID: ${personId} was fetched from SWAPI and saved in database.`,
+        );
+      } else {
+        this.logger.log(`Person with ID: ${personId} was found in database.`);
+      }
+
+      return person;
+    } catch (error) {
+      this.logger.error(
+        `Error while trying to fetch or save person: ${error.message}`,
       );
       throw error;
     }
