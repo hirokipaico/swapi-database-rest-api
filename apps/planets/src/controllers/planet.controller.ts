@@ -1,4 +1,10 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Planet } from '../entities/planet.entity';
 import { PlanetService } from '../services/planet.service';
 import { PageQueryDto } from '../dtos/page-query.dto';
@@ -9,12 +15,20 @@ export class PlanetController {
 
   @Get()
   async getAllPlanets(@Query() query: PageQueryDto): Promise<Planet[]> {
-    const page = query.page;
-    return await this.planetService.getPlanetsUntilPageFromSWAPI(page);
+    try {
+      const page = query.page;
+      return await this.planetService.getPlanetsUntilPageFromSWAPI(page);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 
   @Get(':planetId')
   async getPlanetById(@Param('planetId') id: number): Promise<Planet> {
-    return await this.planetService.getPlanetById(id);
+    try {
+      return await this.planetService.getPlanetById(id);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 }
