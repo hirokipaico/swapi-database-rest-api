@@ -55,31 +55,36 @@ export class PlanetService {
     }
   }
 
-  async getPlanetById(id: number): Promise<Planet> {
+  async getPlanetById(planetId: number): Promise<Planet> {
     try {
       // Get planet from database first
-      let planet = await this.planetRepository.findOne({ where: { id: id } });
+      let planet = await this.planetRepository.findOne({
+        where: { id: planetId },
+      });
 
       if (!planet) {
         // Fetch planet information from SWAPI
         this.logger.error(
-          `Planet with ID: ${id} not found in database. Fetching planet from SWAPI to be saved in database...`,
+          `Planet with ID: ${planetId} not found in database. Fetching planet from SWAPI to be saved in database...`,
         );
         const swapiBaseUrl: string =
           this.configService.get<string>('SWAPI_BASE_URL');
-        const swapiFetchUrl = `${swapiBaseUrl}/planets/${id}?format=json`;
+        const swapiFetchUrl = `${swapiBaseUrl}/planets/${planetId}?format=json`;
 
         const response = await firstValueFrom<Planet>(
           this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
         );
 
         // Save fetched planet in database
-        planet = await this.planetRepository.save({ ...response, id: id });
+        planet = await this.planetRepository.save({
+          ...response,
+          id: planetId,
+        });
         this.logger.log(
-          `Planet wit ID: ${id} was fetched from SWAPI and saved in database.`,
+          `Planet wit ID: ${planetId} was fetched from SWAPI and saved in database.`,
         );
       } else {
-        this.logger.log(`Planet with ID: ${id} was found in database.`);
+        this.logger.log(`Planet with ID: ${planetId} was found in database.`);
       }
 
       return planet;
