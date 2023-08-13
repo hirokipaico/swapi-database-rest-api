@@ -5,8 +5,8 @@ import {
   Param,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Planet } from '../entities/planet.entity';
 import { PlanetService } from '../services/planet.service';
+import { Planet } from '../entities/planet.entity';
 import { PageQueryDto } from '@app/core/dtos/page-query.dto';
 import { IdParamDto } from '@app/core/dtos/id-param.dto';
 
