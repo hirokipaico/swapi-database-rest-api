@@ -1,24 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/swapi-database-rest-api/src",
+  "sourceRoot": "apps/planets/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/swapi-database-rest-api/tsconfig.app.json"
+    "tsConfigPath": "apps/planets/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/swapi-database-rest-api",
+  "root": "apps/planets",
   "projects": {
-    "swapi-database-rest-api": {
-      "type": "application",
-      "root": "apps/swapi-database-rest-api",
-      "entryFile": "main",
-      "sourceRoot": "apps/swapi-database-rest-api/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/swapi-database-rest-api/tsconfig.app.json"
-      }
-    },
     "planets": {
       "type": "application",
       "root": "apps/planets",
@@ -35,6 +26,15 @@
       "sourceRoot": "apps/people/src",
       "compilerOptions": {
         "tsConfigPath": "apps/people/tsconfig.app.json"
+      }
+    },
+    "core": {
+      "type": "library",
+      "root": "libs/core",
+      "entryFile": "index",
+      "sourceRoot": "libs/core/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/core/tsconfig.lib.json"
       }
     }
   }

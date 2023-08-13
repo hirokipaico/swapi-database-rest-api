@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { firstValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -12,6 +13,7 @@ export class PlanetService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    @InjectRepository(Planet)
     private readonly planetRepository: PlanetRepository,
   ) {}
 
@@ -55,15 +57,21 @@ export class PlanetService {
 
   async getPlanetById(id: number): Promise<Planet> {
     try {
-      // Fetch planet information from database
-      const planet = await this.planetRepository.getPlanetById(id);
-      if (planet) {
-        this.logger.log(`Planet found in database. ID: ${id}`);
-        return planet;
+      try {
+        const planet = await this.planetRepository.findOne({
+          where: { id: id },
+        });
+        if (planet) {
+          this.logger.log(`Planet with ID:${id} was found in database.`);
+          return planet;
+        }
+      } catch (error) {
+        this.logger.error(
+          `Planet with ID ${id} was not found in database: ${error.message}`,
+        );
       }
 
       // If the planet is not found on DB or empty object was returned from db then fetch it
-      this.logger.debug(`Planet with ID ${id} was not found in database.`);
       const swapiBaseUrl: string =
         this.configService.get<string>('SWAPI_BASE_URL');
       const swapiFetchUrl = `${swapiBaseUrl}/planets/${id}?format=json`;
