@@ -19,11 +19,12 @@ async function bootstrap() {
   // Security measurements
   app.use(helmet());
   app.enableCors(corsOptions);
-  await app.init();
 
   // Swagger documentation
   const document = SwaggerModule.createDocument(app, PeopleSwaggerConfig);
-  SwaggerModule.setup('api/planets', app, document);
+  SwaggerModule.setup('api/docs/people', app, document);
+
+  await app.init();
 
   const expressApp = app.getHttpAdapter().getInstance();
   return serverlessExpress({ app: expressApp });

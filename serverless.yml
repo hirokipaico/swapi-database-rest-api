@@ -5,6 +5,7 @@ frameworkVersion: "3"
 
 plugins:
   - serverless-plugin-monorepo
+  - serverless-plugin-optimize
   - serverless-jetpack
   - serverless-offline
 
@@ -16,18 +17,18 @@ provider:
   runtime: nodejs18.x
   stage: production
   environment:
-      # External SWAPI (Star Wars) API URL for consumption
-      SWAPI_BASE_URL: ${env:SWAPI_BASE_URL}
+    # External SWAPI (Star Wars) API URL for consumption
+    SWAPI_BASE_URL: ${env:SWAPI_BASE_URL}
 
-      # Nestjs application port
-      PORT: ${env:PORT}
+    # Nestjs application port
+    PORT: ${env:PORT}
 
-      # Amazon RDS Postgres connection variables
-      AWS_RDB_POSTGRES_DB_HOST: ${env:AWS_RDB_POSTGRES_DB_HOST}
-      AWS_RDB_POSTGRES_DB_PORT: ${env:AWS_RDB_POSTGRES_DB_PORT}
-      AWS_RDB_POSTGRES_DB_USERNAME: ${env:AWS_RDB_POSTGRES_DB_USERNAME}
-      AWS_RDB_POSTGRES_DB_PASSWORD: ${env:AWS_RDB_POSTGRES_DB_PASSWORD}
-      AWS_RDB_POSTGRES_DB_NAME: ${env:AWS_RDB_POSTGRES_DB_NAME}
+    # Amazon RDS Postgres connection variables
+    AWS_RDB_POSTGRES_DB_HOST: ${env:AWS_RDB_POSTGRES_DB_HOST}
+    AWS_RDB_POSTGRES_DB_PORT: ${env:AWS_RDB_POSTGRES_DB_PORT}
+    AWS_RDB_POSTGRES_DB_USERNAME: ${env:AWS_RDB_POSTGRES_DB_USERNAME}
+    AWS_RDB_POSTGRES_DB_PASSWORD: ${env:AWS_RDB_POSTGRES_DB_PASSWORD}
+    AWS_RDB_POSTGRES_DB_NAME: ${env:AWS_RDB_POSTGRES_DB_NAME}
   timeout: 15
 
 package:
@@ -46,10 +47,30 @@ functions:
     events:
       - httpApi:
           method: GET
-          path: /api/planets/{proxy+}
+          path: /api/docs/planets
+      - httpApi:
+          method: GET
+          path: /api/planets
+      - httpApi:
+          method: GET
+          path: /api/planets/{id}
+
   people:
     handler: dist/apps/people/main.handler
     events:
       - httpApi:
           method: GET
-          path: /api/people/{proxy+}
+          path: /api/docs/people
+      - httpApi:
+          method: GET
+          path: /api/people
+      - httpApi:
+          method: GET
+          path: /api/people/{id}
+      - httpApi:
+          method: POST
+          path: /api/people
+
+custom:
+    optimize:
+        external: ['swagger-ui-dist']
