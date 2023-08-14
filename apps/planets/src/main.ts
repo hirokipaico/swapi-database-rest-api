@@ -1,30 +1,40 @@
 import { NestFactory } from '@nestjs/core';
 import { PlanetsModule } from './planets.module';
+import { SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import helmet from 'helmet';
+import { PlanetSwaggerConfig } from 'libs/config/swagger/planet.config';
 import { corsOptions } from 'libs/config/cors.config';
-import { Handler } from 'aws-lambda';
+import helmet from 'helmet';
+import { Handler, Context, Callback } from 'aws-lambda';
+import serverlessExpress from '@vendia/serverless-express';
 
-let cachedApp;
+let server: Handler;
 
 async function bootstrap() {
-  if (!cachedApp) {
-    const app = await NestFactory.create(PlanetsModule);
+  const app = await NestFactory.create(PlanetsModule);
 
-    app.setGlobalPrefix('api');
-    app.useGlobalPipes(new ValidationPipe());
+  app.setGlobalPrefix('api');
+  app.useGlobalPipes(new ValidationPipe());
 
-    // Security measurements
-    app.use(helmet());
-    app.enableCors(corsOptions);
+  // Security measurements
+  app.use(helmet());
+  app.enableCors(corsOptions);
 
-    cachedApp = app;
-  }
-  return cachedApp;
+  // Swagger documentation
+  const document = SwaggerModule.createDocument(app, PlanetSwaggerConfig);
+  SwaggerModule.setup('api/people', app, document);
+
+  await app.init();
+
+  const expressApp = app.getHttpAdapter().getInstance();
+  return serverlessExpress({ app: expressApp });
 }
 
-export const handler: Handler = async (event: any, context: any) => {
-  context.callbackWaitsForEmptyEventLoop = false;
-  const app = await bootstrap();
-  return app.getHttpAdapter().proxy(event, context);
+export const handler: Handler = async (
+  event: any,
+  context: Context,
+  callback: Callback,
+) => {
+  server = server ?? (await bootstrap());
+  return server(event, context, callback);
 };

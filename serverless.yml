@@ -1,17 +1,34 @@
 org: hirokipaico
 app: swapi-database-rest-api
 service: "swapi-database-rest-api"
+frameworkVersion: "3"
 
 plugins:
   - serverless-plugin-monorepo
   - serverless-jetpack
+  - serverless-offline
+
+useDotenv: true
 
 provider:
   name: aws
   region: us-east-2
   runtime: nodejs18.x
   stage: production
-frameworkVersion: "3"
+  environment:
+      # External SWAPI (Star Wars) API URL for consumption
+      SWAPI_BASE_URL: ${env:SWAPI_BASE_URL}
+
+      # Nestjs application port
+      PORT: ${env:PORT}
+
+      # Amazon RDS Postgres connection variables
+      AWS_RDB_POSTGRES_DB_HOST: ${env:AWS_RDB_POSTGRES_DB_HOST}
+      AWS_RDB_POSTGRES_DB_PORT: ${env:AWS_RDB_POSTGRES_DB_PORT}
+      AWS_RDB_POSTGRES_DB_USERNAME: ${env:AWS_RDB_POSTGRES_DB_USERNAME}
+      AWS_RDB_POSTGRES_DB_PASSWORD: ${env:AWS_RDB_POSTGRES_DB_PASSWORD}
+      AWS_RDB_POSTGRES_DB_NAME: ${env:AWS_RDB_POSTGRES_DB_NAME}
+  timeout: 15
 
 package:
   exclude:
@@ -28,15 +45,11 @@ functions:
     handler: dist/apps/planets/main.handler
     events:
       - httpApi:
-          method: get
-          path: /api/planets
+          method: GET
+          path: /api/planets/{proxy+}
   people:
     handler: dist/apps/people/main.handler
     events:
       - httpApi:
-          method: get
-          path: /api/people/{id}
-      
-      - httpApi:
-          method: post
-          path: /api/people
+          method: GET
+          path: /api/people/{proxy+}
