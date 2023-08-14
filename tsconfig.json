@@ -17,6 +17,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true, // Set to true for module interoperability in serverless deployment.
     "paths": {
       "@app/core": [
         "libs/core/src"

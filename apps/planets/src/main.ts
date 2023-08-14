@@ -22,7 +22,7 @@ async function bootstrap() {
 
   // Swagger documentation
   const document = SwaggerModule.createDocument(app, PlanetSwaggerConfig);
-  SwaggerModule.setup('api/people', app, document);
+  SwaggerModule.setup('api/docs/planets', app, document);
 
   await app.init();
 
