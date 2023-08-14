@@ -1,0 +1,42 @@
+org: hirokipaico
+app: swapi-database-rest-api
+service: "swapi-database-rest-api"
+
+plugins:
+  - serverless-plugin-monorepo
+  - serverless-jetpack
+
+provider:
+  name: aws
+  region: us-east-2
+  runtime: nodejs18.x
+  stage: production
+frameworkVersion: "3"
+
+package:
+  exclude:
+    - .gitignore
+    - README.md
+    - serverless.yml
+    - nest-cli.json
+    - .prettierrc
+  excludeDevDependencies: true
+  individually: true
+
+functions:
+  planets:
+    handler: dist/apps/planets/main.handler
+    events:
+      - httpApi:
+          method: get
+          path: /api/planets
+  people:
+    handler: dist/apps/people/main.handler
+    events:
+      - httpApi:
+          method: get
+          path: /api/people/{id}
+      
+      - httpApi:
+          method: post
+          path: /api/people

@@ -1,28 +1,30 @@
 import { NestFactory } from '@nestjs/core';
 import { PeopleModule } from './people.module';
-import { SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import { PeopleSwaggerConfig } from 'libs/config/swagger/people.config';
 import helmet from 'helmet';
 import { corsOptions } from 'libs/config/cors.config';
+import { Handler } from 'aws-lambda';
+
+let cachedApp;
 
 async function bootstrap() {
-  const app = await NestFactory.create(PeopleModule);
-  const configService = app.get(ConfigService);
+  if (!cachedApp) {
+    const app = await NestFactory.create(PeopleModule);
 
-  app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe());
+    app.setGlobalPrefix('api');
+    app.useGlobalPipes(new ValidationPipe());
 
-  // Security measurements
-  app.use(helmet());
-  app.enableCors(corsOptions);
+    // Security measurements
+    app.use(helmet());
+    app.enableCors(corsOptions);
 
-  // Swagger documentation
-  const document = SwaggerModule.createDocument(app, PeopleSwaggerConfig);
-  SwaggerModule.setup('api', app, document);
-
-  const port = configService.get<number>('PORT') || 3001;
-  await app.listen(port);
+    cachedApp = app;
+  }
+  return cachedApp;
 }
-bootstrap();
+
+export const handler: Handler = async (event: any, context: any) => {
+  context.callbackWaitsForEmptyEventLoop = false;
+  const app = await bootstrap();
+  return app.getHttpAdapter().proxy(event, context);
+};

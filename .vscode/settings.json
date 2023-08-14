@@ -1,5 +1,4 @@
 {
-  "yaml.schemas": {
-    "https://raw.githubusercontent.com/lalcebo/json-schema/master/serverless/reference.json": "file:///e%3A/MEGAsync/MEGAsync/Pr%C3%A1cticas/Repositorios/Pr%C3%A1cticas%20para%20entrevistas%20o%20pruebas%20t%C3%A9cnicas/Nestjs/swapi-database-rest-api/apps/people/src/serverless.yml"
-  }
+  "git.enableSmartCommit": false,
+  "git.suggestSmartCommit": true,
 }
