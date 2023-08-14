@@ -1,0 +1,37 @@
+org: hirokipaico
+app: swapi-db-api
+# serverless.yml
+service: swapi-db-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: development
+  region: us-east-2
+  memorySize: 2048
+  logRetentionInDays: 1
+  timeout: 15
+
+# Deploy functions for both people and planets
+functions:
+  people:
+    handler: apps/people/lambda.handler
+    events:
+      - httpApi:
+          method: get
+          path: /api/people/{proxy+}
+      - httpApi:
+          method: post
+          path: /api/people/{proxy+}
+
+  planets:
+    handler: apps/planets/lambda.handler
+    events:
+      - httpApi:
+          method: get
+          path: /api/planets/{proxy+}
+
+plugins:
+  - serverless-plugin-monorepo
