@@ -59,9 +59,11 @@ export class PlanetController {
   @ApiInternalServerErrorResponse({
     description: `An internal server error ocurred.`,
   })
-  async getPlanetById(@Param('id') planetId: number): Promise<Planet> {
+  async getPlanetById(
+    @Param('id', PositiveIntPipe) id: number,
+  ): Promise<Planet> {
     try {
-      return await this.planetService.getPlanetById(planetId);
+      return await this.planetService.getPlanetById(id);
     } catch (error) {
       throw error;
     }

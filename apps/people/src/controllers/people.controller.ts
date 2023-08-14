@@ -60,10 +60,10 @@ export class PeopleController {
   })
   async getPersonById(
     @Param('id', PositiveIntPipe)
-    personId: number,
+    id: number,
   ): Promise<Person> {
     try {
-      return this.peopleService.getPersonById(personId);
+      return this.peopleService.getPersonById(id);
     } catch (error) {
       throw error;
     }
