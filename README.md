@@ -7,6 +7,8 @@
 
 Star wars database monorepo project built with [Nest](https://github.com/nestjs/nest), [Typescript](https://www.typescriptlang.org/), [Serverless](https://serverless.com), [TypeORM](https://https://typeorm.io/), [PostgreSQL](https://https://www.postgresql.org/) and OpenAPI/Swagger documentation. This project consists of two separates Nestjs subapps called `planets` and `people`, each one with its own `main.ts` entry file with their respective handlers for AWS Lambda deployment.
 
+Live deployed REST API for evaluation | [Link]
+
 ## Installation
 
 Install all dependencies to run the monorepo project.
