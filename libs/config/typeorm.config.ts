@@ -18,12 +18,6 @@ const postgresConfig = (
     username: configService.get<string>('AWS_RDB_POSTGRES_DB_USERNAME'),
     password: configService.get<string>('AWS_RDB_POSTGRES_DB_PASSWORD'),
     database: configService.get<string>('AWS_RDB_POSTGRES_DB_NAME'),
-    ssl: true,
-    extra: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    },
     entities: [Planet, Person],
     migrations: [join(__dirname + '../migrations/*{.ts,.js}')],
     migrationsRun: true,
