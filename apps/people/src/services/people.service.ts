@@ -81,6 +81,10 @@ export class PeopleService {
       });
 
       if (!person) {
+        // Fetch planet information from SWAPI
+        this.logger.warn(
+          `Person with ID: ${personId} not found in database. Fetching person from SWAPI to be saved in database...`,
+        );
         const swapiBaseUrl: string =
           this.configService.get<string>('SWAPI_BASE_URL');
         const swapiFetchUrl = `${swapiBaseUrl}/people/${personId}?format=json`;

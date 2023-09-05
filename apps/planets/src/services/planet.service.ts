@@ -79,7 +79,7 @@ export class PlanetService {
 
       if (!planet) {
         // Fetch planet information from SWAPI
-        this.logger.error(
+        this.logger.warn(
           `Planet with ID: ${planetId} not found in database. Fetching planet from SWAPI to be saved in database...`,
         );
         const swapiBaseUrl: string =
