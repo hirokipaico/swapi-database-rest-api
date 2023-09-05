@@ -36,6 +36,7 @@ package:
     - .gitignore
     - README.md
     - serverless.yml
+    - compose.yaml
     - nest-cli.json
     - .prettierrc
   excludeDevDependencies: true
