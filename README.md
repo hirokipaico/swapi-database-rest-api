@@ -22,6 +22,12 @@ Install all dependencies to run the monorepo project.
 $ npm install
 ```
 
+Some global dependencies are required also in order to properly follow the steps and deploy to AWS Cloud with serverless.
+
+```bash
+$ npm install -g @nestjs/cli serverless
+```
+
 ## Environment
 
 Before starting the apps, create and `.env` file in the root folder of the project, with the following template:
@@ -34,7 +40,7 @@ SWAPI_BASE_URL=https://swapi.dev/api
 PORT=3000 
 
 # Amazon RDS Postgres connection variables
-AWS_RDB_POSTGRES_DB_HOST=your.awsrds.host
+AWS_RDB_POSTGRES_DB_HOST=your.awsrds.postgres.host
 AWS_RDB_POSTGRES_DB_PORT=5432
 AWS_RDB_POSTGRES_DB_USERNAME=yourusername
 AWS_RDB_POSTGRES_DB_PASSWORD=yourpassword
@@ -58,16 +64,13 @@ You can alternatively run the unit tests in the monorepo project for evaluation 
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
 # test coverage
 $ npm run test:cov
 ```
 
 ## Deploy with Serverless framework
 
-The project contains the appropiated plugins to be 
+The project contains the appropiated plugins to be used for optimization and offline testing. Use these commands to perform the following actions:
 
 ```bash
 # offline testing
