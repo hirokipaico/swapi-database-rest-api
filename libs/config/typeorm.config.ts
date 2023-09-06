@@ -20,6 +20,12 @@ const postgresConfig = (
     database: configService.get<string>('AWS_RDB_POSTGRES_DB_NAME'),
     entities: [Planet, Person],
     migrations: [join(__dirname + '../migrations/*{.ts,.js}')],
+    ssl: true,
+    extra: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
     migrationsRun: true,
     synchronize: true,
     logging: false,

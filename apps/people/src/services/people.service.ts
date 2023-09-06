@@ -3,6 +3,7 @@ import { map, firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Person } from '../entities/person.entity';
+import { Persona } from '../interfaces/persona.interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PeopleRepository } from '../repositories/person.repository';
 
@@ -34,9 +35,26 @@ export class PeopleService {
     };
   }
 
-  async getAllPeopleFromSWAPI(page: number): Promise<Partial<Person>[]> {
+  private translatePersonAttributesToSpanish(person: Person): Partial<Persona> {
+    return {
+      nombre: person.name,
+      altura: person.height,
+      masa: person.mass,
+      color_de_pelo: person.hair_color,
+      color_de_piel: person.skin_color,
+      color_de_ojos: person.eye_color,
+      fecha_de_nacimiento: person.birth_year,
+      genero: person.gender,
+      mundo_natal: person.homeworld,
+      creado: person.created,
+      editado: person.edited,
+      url: person.url,
+    };
+  }
+
+  async getAllPeopleFromSWAPI(page: number): Promise<Partial<Persona>[]> {
     try {
-      const people: Partial<Person>[] = [];
+      const people: Partial<Persona>[] = [];
       const swapiBaseUrl: string =
         this.configService.get<string>('SWAPI_BASE_URL');
       let fetchedPages = 0;
@@ -53,8 +71,8 @@ export class PeopleService {
 
           fetchedPages++;
 
-          const transformedPeople: Partial<Person>[] = response.map(
-            (apiPerson) => this.transformApiPerson(apiPerson),
+          const transformedPeople: Partial<Persona>[] = response.map(
+            (apiPerson) => this.translatePersonAttributesToSpanish(apiPerson),
           );
 
           people.push(...transformedPeople);
@@ -74,7 +92,7 @@ export class PeopleService {
     }
   }
 
-  async getPersonById(personId: number): Promise<Person> {
+  async getPersonById(personId: number): Promise<Persona> {
     try {
       let person = await this.peopleRepository.findOne({
         where: { id: personId },
@@ -93,10 +111,9 @@ export class PeopleService {
           this.httpService.get(swapiFetchUrl).pipe(map((res) => res.data)),
         );
 
-        const transformedPerson = this.transformApiPerson(response);
         person = await this.peopleRepository.save({
-          ...transformedPerson,
-          id: Number(personId),
+          ...this.transformApiPerson(response),
+          id: personId,
         });
         this.logger.log(
           `Person with ID: ${personId} was fetched from SWAPI and saved in the database.`,
@@ -107,7 +124,10 @@ export class PeopleService {
         );
       }
 
-      return person;
+      return Object.assign({
+        ...this.translatePersonAttributesToSpanish(person),
+        id: personId,
+      });
     } catch (error) {
       this.logger.error(
         `Error while trying to fetch or save person: ${error.message}`,
@@ -136,12 +156,15 @@ export class PeopleService {
     }
   }
 
-  async savePerson(person: Person): Promise<Person> {
+  async savePerson(person: Person): Promise<Persona> {
     try {
       this.logger.log(`Saving person with ID: ${person.id} in database...`);
       const savedPerson = await this.peopleRepository.save(person);
 
-      return savedPerson;
+      return Object.assign({
+        ...this.translatePersonAttributesToSpanish(savedPerson),
+        id: person.id,
+      });
     } catch (error) {
       this.logger.error(`Error while trying to save person: ${error.message}`);
       throw error;

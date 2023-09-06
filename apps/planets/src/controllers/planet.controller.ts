@@ -10,6 +10,7 @@ import {
 import { PlanetService } from '../services/planet.service';
 import { Planet } from '../entities/planet.entity';
 import { PositiveIntPipe } from '@app/core/pipes/positive-integer.pipe';
+import { Planeta } from '../interfaces/planeta.interface';
 
 @ApiTags('planets')
 @Controller('planets')
@@ -35,7 +36,7 @@ export class PlanetController {
   })
   async getAllPlanets(
     @Query('page', PositiveIntPipe) page: number,
-  ): Promise<Planet[]> {
+  ): Promise<Partial<Planeta>[]> {
     try {
       return await this.planetService.getPlanetsUntilPageFromSWAPI(page);
     } catch (error) {
@@ -61,7 +62,7 @@ export class PlanetController {
   })
   async getPlanetById(
     @Param('id', PositiveIntPipe) id: number,
-  ): Promise<Planet> {
+  ): Promise<Planeta> {
     try {
       return await this.planetService.getPlanetById(id);
     } catch (error) {

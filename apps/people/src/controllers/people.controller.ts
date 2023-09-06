@@ -11,6 +11,7 @@ import { PeopleService } from '../services/people.service';
 import { Person } from '../entities/person.entity';
 import { InputPersonDto } from '../dtos/person.dto';
 import { PositiveIntPipe } from '@app/core/pipes/positive-integer.pipe';
+import { Persona } from '../interfaces/persona.interface';
 
 @ApiTags('people')
 @Controller('people')
@@ -35,7 +36,7 @@ export class PeopleController {
   })
   async getAllPeople(
     @Query('page', PositiveIntPipe) page: number,
-  ): Promise<Partial<Person>[]> {
+  ): Promise<Partial<Persona>[]> {
     try {
       return this.peopleService.getAllPeopleFromSWAPI(page);
     } catch (error) {
@@ -61,7 +62,7 @@ export class PeopleController {
   async getPersonById(
     @Param('id', PositiveIntPipe)
     id: number,
-  ): Promise<Person> {
+  ): Promise<Persona> {
     try {
       return this.peopleService.getPersonById(id);
     } catch (error) {

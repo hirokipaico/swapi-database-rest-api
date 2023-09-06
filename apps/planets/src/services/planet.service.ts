@@ -5,6 +5,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { PlanetRepository } from '../repositories/planet.repository';
 import { Planet } from '../entities/planet.entity';
+import { Planeta } from '../interfaces/planeta.interface';
 
 @Injectable()
 export class PlanetService {
@@ -17,9 +18,8 @@ export class PlanetService {
     private readonly planetRepository: PlanetRepository,
   ) {}
 
-  private transformApiPlanet(apiPlanet: Planet): Planet {
+  private transformApiPlanet(apiPlanet: Planet): Partial<Planet> {
     return {
-      id: null,
       name: apiPlanet.name,
       climate: apiPlanet.climate,
       diameter: apiPlanet.diameter,
@@ -31,9 +31,24 @@ export class PlanetService {
     };
   }
 
-  async getPlanetsUntilPageFromSWAPI(page: number): Promise<Planet[]> {
+  private translatePlanetAttributesToSpanish(planet: Planet): Partial<Planeta> {
+    return {
+      nombre: planet.name,
+      clima: planet.climate,
+      diámetro: planet.diameter,
+      gravedad: planet.gravity,
+      población: planet.population,
+      residentes: planet.residents,
+      terreno: planet.terrain,
+      url: planet.url,
+    };
+  }
+
+  async getPlanetsUntilPageFromSWAPI(
+    page: number,
+  ): Promise<Partial<Planeta>[]> {
     try {
-      const planets: Planet[] = [];
+      const planets: Partial<Planeta>[] = [];
       const swapiBaseUrl: string =
         this.configService.get<string>('SWAPI_BASE_URL');
       let fetchedPages = 0;
@@ -49,8 +64,8 @@ export class PlanetService {
 
           fetchedPages++;
 
-          const transformedPlanets: Planet[] = response.results.map(
-            (apiPlanet) => this.transformApiPlanet(apiPlanet),
+          const transformedPlanets = response.results.map((apiPlanet) =>
+            this.translatePlanetAttributesToSpanish(apiPlanet),
           );
 
           planets.push(...transformedPlanets);
@@ -70,7 +85,7 @@ export class PlanetService {
     }
   }
 
-  async getPlanetById(planetId: number): Promise<Planet> {
+  async getPlanetById(planetId: number): Promise<Planeta> {
     try {
       // Get planet from database first
       let planet = await this.planetRepository.findOne({
@@ -91,11 +106,11 @@ export class PlanetService {
         );
 
         // Save transformed planet in database
-        const transformedPlanet: Planet = this.transformApiPlanet(response);
-        planet = await this.planetRepository.save({
-          ...transformedPlanet,
+        const transformedPlanet: Planet = Object.assign({
+          ...this.transformApiPlanet(response),
           id: Number(planetId),
         });
+        planet = await this.planetRepository.save(transformedPlanet);
         this.logger.log(
           `Planet with ID: ${planetId} was fetched from SWAPI and saved in database.`,
         );
@@ -103,7 +118,10 @@ export class PlanetService {
         this.logger.log(`Planet with ID: ${planetId} was found in database.`);
       }
 
-      return planet;
+      return Object.assign({
+        ...this.translatePlanetAttributesToSpanish(planet),
+        id: planetId,
+      });
     } catch (error) {
       this.logger.error(
         `Error while trying to fetch or save planet: ${error.message}`,
