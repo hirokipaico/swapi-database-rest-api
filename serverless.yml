@@ -30,6 +30,14 @@ provider:
     AWS_RDB_POSTGRES_DB_PASSWORD: ${env:AWS_RDB_POSTGRES_DB_PASSWORD}
     AWS_RDB_POSTGRES_DB_NAME: ${env:AWS_RDB_POSTGRES_DB_NAME}
   timeout: 15
+  apiGateway:
+    shouldStartNameWithService: true
+  httpApi:
+    cors: true
+    payload: "2.0"
+    disableDefaultEndpoint: false
+    defaultAuthorizer:
+      name: aws_iam
 
 package:
   exclude:

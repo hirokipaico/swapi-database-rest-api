@@ -1,10 +1,10 @@
 services:
-  results:
-    image: postgres
+  postgres:
+    image: postgres:15.4
     restart: always
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=test12345
-      - POSTGRES_DB=swapidb
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=swapi_db
