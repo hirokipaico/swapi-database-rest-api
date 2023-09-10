@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PlanetController } from './planet.controller';
 import { PlanetService } from '../services/planet.service';
-import { Planet } from '../entities/planet.entity';
+
 import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { Planeta } from '../interfaces/planeta.interface';
 
 describe('PlanetController', () => {
   let planetController: PlanetController;
@@ -31,15 +32,15 @@ describe('PlanetController', () => {
 
   describe('getAllPlanets', () => {
     it('should return an array of planets', async () => {
-      const mockPlanets: Planet[] = [
+      const mockPlanets: Planeta[] = [
         {
           id: null,
-          name: 'Tatooine',
-          climate: 'arid',
-          diameter: '10465',
-          gravity: '1 standard',
-          population: '200000',
-          residents: [
+          nombre: 'Tatooine',
+          clima: 'arid',
+          diámetro: '10465',
+          gravedad: '1 standard',
+          población: '200000',
+          residentes: [
             'https://swapi.dev/api/people/1/',
             'https://swapi.dev/api/people/2/',
             'https://swapi.dev/api/people/4/',
@@ -51,18 +52,18 @@ describe('PlanetController', () => {
             'https://swapi.dev/api/people/43/',
             'https://swapi.dev/api/people/62/',
           ],
-          terrain: 'desert',
+          terreno: 'desert',
           url: 'https://swapi.dev/api/planets/1/',
         },
         {
           id: null,
-          name: 'Yavin IV',
-          climate: 'temperate, tropical',
-          diameter: '10200',
-          gravity: '1 standard',
-          population: '1000',
-          residents: [],
-          terrain: 'jungle, rainforests',
+          nombre: 'Yavin IV',
+          clima: 'temperate, tropical',
+          diámetro: '10200',
+          gravedad: '1 standard',
+          población: '1000',
+          residentes: [],
+          terreno: 'jungle, rainforests',
           url: 'https://swapi.dev/api/planets/3/',
         },
       ];
@@ -73,8 +74,8 @@ describe('PlanetController', () => {
 
       const result = await planetController.getAllPlanets(1);
 
-      const expectedNames = mockPlanets.map((mockPlanet) => mockPlanet.name);
-      const actualNames = result.map((resultPlanet) => resultPlanet.name);
+      const expectedNames = mockPlanets.map((mockPlanet) => mockPlanet.nombre);
+      const actualNames = result.map((resultPlanet) => resultPlanet.nombre);
 
       // Check if each expected name is present in the actual names
       expectedNames.forEach((expectedName) => {
@@ -103,14 +104,14 @@ describe('PlanetController', () => {
 
   describe('getPlanetById', () => {
     it('should return specific planet based on ID 2', async () => {
-      const mockPlanet: Planet = {
-        name: 'Alderaan',
-        diameter: '12500',
-        climate: 'temperate',
-        gravity: '1 standard',
-        terrain: 'grasslands, mountains',
-        population: '2000000000',
-        residents: [
+      const mockPlanet: Planeta = {
+        nombre: 'Alderaan',
+        diámetro: '12500',
+        clima: 'temperate',
+        gravedad: '1 standard',
+        terreno: 'grasslands, mountains',
+        población: '2000000000',
+        residentes: [
           'https://swapi.dev/api/people/5/',
           'https://swapi.dev/api/people/68/',
           'https://swapi.dev/api/people/81/',

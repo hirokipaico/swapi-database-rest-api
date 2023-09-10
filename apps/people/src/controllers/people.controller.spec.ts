@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InputPersonDto } from '../dtos/person.dto';
+import { Persona } from '../interfaces/persona.interface';
 
 describe('PeopleController', () => {
   let peopleController: PeopleController;
@@ -65,18 +66,18 @@ describe('PeopleController', () => {
 
   describe('getPersonById', () => {
     it('should return a specific person with ID 1', async () => {
-      const mockPerson: Person = {
-        name: 'Luke Skywalker',
-        height: '172',
-        mass: '77',
-        hair_color: 'blond',
-        skin_color: 'fair',
-        eye_color: 'blue',
-        birth_year: '19BBY',
-        gender: 'male',
-        homeworld: 'https://swapi.dev/api/planets/1/',
-        created: '2014-12-09T13:50:51.644000Z',
-        edited: '2014-12-20T21:17:56.891000Z',
+      const mockPerson: Persona = {
+        nombre: 'Luke Skywalker',
+        altura: '172',
+        masa: '77',
+        color_de_pelo: 'blond',
+        color_de_piel: 'fair',
+        color_de_ojos: 'blue',
+        fecha_de_nacimiento: '19BBY',
+        genero: 'male',
+        mundo_natal: 'https://swapi.dev/api/planets/1/',
+        creado: '2014-12-09T13:50:51.644000Z',
+        editado: '2014-12-20T21:17:56.891000Z',
         url: 'https://swapi.dev/api/people/1/',
         id: 1,
       };
@@ -122,12 +123,20 @@ describe('PeopleController', () => {
 
       const nextId = await peopleService.getNextAvailableId();
       const currentDate = new Date().toISOString();
-      const expectedSavedPerson: Person = {
+      const expectedSavedPerson: Persona = {
         id: nextId,
-        created: currentDate,
-        edited: currentDate,
+        creado: currentDate,
+        editado: currentDate,
         url: null,
-        ...inputDto,
+        nombre: inputDto.gender,
+        fecha_de_nacimiento: inputDto.birth_year,
+        color_de_ojos: inputDto.eye_color,
+        genero: inputDto.gender,
+        color_de_pelo: inputDto.hair_color,
+        altura: inputDto.height,
+        mundo_natal: inputDto.homeworld,
+        masa: inputDto.mass,
+        color_de_piel: inputDto.skin_color,
       };
 
       jest
